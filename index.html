@@ -10,6 +10,8 @@
 
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1DB954">
+<link rel="icon" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
 
 <style>
 
@@ -19,6 +21,7 @@ margin:0;
 font-family:Arial;
 background: radial-gradient(circle at top,#1a1a1a,#000);
 color:white;
+scroll-behavior:smooth;
 }
 
 /* HEADER */
@@ -31,13 +34,23 @@ color:#1DB954;
 font-weight:bold;
 }
 
+nav a{
+color:white;
+margin:0 10px;
+text-decoration:none;
+font-size:14px;
+}
+
+nav a:hover{
+color:#1DB954;
+}
+
 /* HERO */
 .hero{
 text-align:center;
-padding:60px 20px 120px 20px;
+padding:50px 20px;
 }
 
-/* BOTÓN */
 .btn{
 background:#1DB954;
 border:none;
@@ -93,59 +106,77 @@ animation:wave 1s infinite ease-in-out;
 50%{height:40px;}
 }
 
-/* 🧠 RESPONSIVE REAL */
-@media (max-width:768px){
-
-.hero{
-padding:40px 15px 100px 15px;
+/* 🧭 PORTAL SECCIONES */
+section{
+padding:20px;
 }
+
+/* 📰 NOTICIAS */
+.news{
+margin-top:20px;
+}
+
+textarea{
+width:100%;
+height:90px;
+border-radius:10px;
+padding:10px;
+}
+
+.news button{
+margin-top:10px;
+background:#1DB954;
+border:none;
+padding:10px 20px;
+border-radius:20px;
+color:white;
+cursor:pointer;
+}
+
+.news-item{
+background:#181818;
+padding:10px;
+margin-top:10px;
+border-radius:10px;
+}
+
+/* 📸 INSTAGRAM SLIDER */
+.slider{
+display:flex;
+overflow-x:auto;
+gap:10px;
+padding:10px;
+scroll-snap-type:x mandatory;
+}
+
+.slider img{
+width:80%;
+max-width:300px;
+height:200px;
+object-fit:cover;
+border-radius:15px;
+scroll-snap-align:center;
+flex-shrink:0;
+box-shadow:0 10px 20px rgba(0,0,0,.4);
+}
+
+.slider::-webkit-scrollbar{
+display:none;
+}
+
+/* 📱 RESPONSIVE */
+@media (max-width:768px){
 
 .btn{
 width:90%;
-font-size:16px;
-padding:16px;
 }
 
-#waves{
-transform:scale(0.8);
+.slider img{
+width:90%;
+height:180px;
 }
 
 }
-
-/* 🎧 MINI PLAYER SOLO UNO */
-.player{
-position:fixed;
-bottom:0;
-left:0;
-right:0;
-background:#121212;
-padding:12px;
-display:flex;
-justify-content:center;
-align-items:center;
-z-index:9999;
-}
-
-/* EQ */
-.eq{
-display:none;
-gap:3px;
-align-items:flex-end;
-height:20px;
-margin-left:15px;
-}
-
-.eq div{
-width:4px;
-height:5px;
-background:#1DB954;
-animation:wave 1s infinite ease-in-out;
-}
-
-.eq div:nth-child(2){animation-delay:0.1s;}
-.eq div:nth-child(3){animation-delay:0.2s;}
-.eq div:nth-child(4){animation-delay:0.3s;}
-.eq div:nth-child(5){animation-delay:0.4s;}
 
 </style>
 
@@ -153,9 +184,20 @@ animation:wave 1s infinite ease-in-out;
 
 <body>
 
+<!-- HEADER -->
 <header>
 🌲 RADIO FORESTAL DE MÉXICO
+
+<nav>
+<a href="#inicio">Inicio</a>
+<a href="#radio">Radio</a>
+<a href="#noticias">Noticias</a>
+<a href="#galeria">Galería</a>
+</nav>
 </header>
+
+<!-- INICIO / RADIO -->
+<section id="inicio">
 
 <div class="hero">
 
@@ -167,11 +209,9 @@ var a=document.getElementById('radio');
 if(a.paused){
 a.play();
 document.getElementById('onair').style.display='block';
-document.getElementById('eq').style.display='flex';
 }else{
 a.pause();
 document.getElementById('onair').style.display='none';
-document.getElementById('eq').style.display='none';
 }
 ">
 ▶ ESCUCHAR EN VIVO
@@ -193,29 +233,75 @@ document.getElementById('eq').style.display='none';
 
 </div>
 
-<!-- PLAYER ÚNICO -->
-<div class="player">
+</section>
 
-<button class="btn"
-style="padding:10px 20px;font-size:14px;"
-onclick="
-var a=document.getElementById('radio');
-if(a.paused){a.play();document.getElementById('eq').style.display='flex';}
-else{a.pause();document.getElementById('eq').style.display='none';}
-">
-▶ RADIO
-</button>
+<!-- NOTICIAS -->
+<section id="noticias">
 
-<div id="eq" class="eq">
-<div></div><div></div><div></div><div></div><div></div>
-</div>
+<h2>📰 Noticias en Vivo</h2>
+
+<div class="news">
+
+<textarea id="editor" placeholder="Escribe una noticia..."></textarea>
+<br>
+<button onclick="saveNews()">Guardar noticia</button>
+
+<div id="newsList"></div>
 
 </div>
+
+</section>
+
+<!-- GALERÍA -->
+<section id="galeria">
+
+<h2>📸 Galería tipo Instagram</h2>
+
+<div class="slider">
+
+<img src="foto1.jpg">
+<img src="foto2.jpg">
+<img src="foto3.jpg">
+<img src="foto4.jpg">
+
+</div>
+
+</section>
 
 <script>
+
+/* 📡 Guardar noticias */
+function saveNews(){
+let text=document.getElementById("editor").value;
+if(!text)return;
+
+let news=JSON.parse(localStorage.getItem("news")||"[]");
+news.unshift(text);
+localStorage.setItem("news",JSON.stringify(news));
+
+loadNews();
+document.getElementById("editor").value="";
+}
+
+/* 📡 Cargar noticias */
+function loadNews(){
+let news=JSON.parse(localStorage.getItem("news")||"[]");
+let html="";
+
+news.forEach(n=>{
+html+=`<div class='news-item'>📰 ${n}</div>`;
+});
+
+document.getElementById("newsList").innerHTML=html;
+}
+
+loadNews();
+
+/* PWA */
 if('serviceWorker' in navigator){
 navigator.serviceWorker.register('service-worker.js');
 }
+
 </script>
 
 </body>
